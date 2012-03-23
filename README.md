@@ -1,4 +1,5 @@
-#About the oauth library for BlackBerry 10
+About the oauth library for BlackBerry 10
+==========================================
 This is a OAuth library built for the Cascades development framework for BlackBerry 10. It is a fork and BlackBerry specific implementation of the KQOauth library that can be found here http://www.gitorious.org/kqoauth under the LGPL license.
 
 This library supports both OAuth1 and OAuth2 authorization flow and authorized requests.
