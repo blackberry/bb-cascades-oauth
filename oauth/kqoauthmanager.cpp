@@ -311,6 +311,7 @@ void KQOAuthManager::executeAuthorizedRequest(KQOAuthRequest *request, int id) {
         QUrl urlWithParams = networkRequest.url();
         urlWithParams.setQueryItems(urlParams);
         networkRequest.setUrl(urlWithParams);
+        qDebug() << networkRequest.url();
 
         // Submit the request including the params.
         QNetworkReply *reply = d->networkManager->get(networkRequest);
@@ -321,11 +322,10 @@ void KQOAuthManager::executeAuthorizedRequest(KQOAuthRequest *request, int id) {
 
         networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, request->contentType());
 
-        /*
         qDebug() << networkRequest.rawHeaderList();
         qDebug() << networkRequest.rawHeader("Authorization");
         qDebug() << networkRequest.rawHeader("Content-Type");
-        */
+
         QNetworkReply *reply;
         if (request->contentType() == "application/x-www-form-urlencoded") {
           reply = d->networkManager->post(networkRequest, request->requestBody());

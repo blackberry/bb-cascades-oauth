@@ -3,6 +3,7 @@
  *
  * Author: Johan Paul (johan.paul@d-pointer.com)
  *         http://www.d-pointer.com
+ *         This file: Kyle Fowler
  *
  *  KQOAuth is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by

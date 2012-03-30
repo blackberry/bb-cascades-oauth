@@ -75,14 +75,12 @@ void KQOAuthRequestPrivate::prepareRequest() {
         break;
 
     case KQOAuthRequest::AuthorizedRequest:
-    	if(requestOAuthMethod == KQOAuthRequest::OAUTH1) {
-			requestParameters.append( qMakePair( OAUTH_KEY_SIGNATURE_METHOD, oauthSignatureMethod ));
-			requestParameters.append( qMakePair( OAUTH_KEY_CONSUMER_KEY, oauthConsumerKey ));
-			requestParameters.append( qMakePair( OAUTH_KEY_VERSION, oauthVersion ));
-			requestParameters.append( qMakePair( OAUTH_KEY_TIMESTAMP, this->oauthTimestamp() ));
-			requestParameters.append( qMakePair( OAUTH_KEY_NONCE, this->oauthNonce() ));
-			requestParameters.append( qMakePair( OAUTH_KEY_TOKEN, oauthToken ));
-    	}
+		requestParameters.append( qMakePair( OAUTH_KEY_SIGNATURE_METHOD, oauthSignatureMethod ));
+		requestParameters.append( qMakePair( OAUTH_KEY_CONSUMER_KEY, oauthConsumerKey ));
+		requestParameters.append( qMakePair( OAUTH_KEY_VERSION, oauthVersion ));
+		requestParameters.append( qMakePair( OAUTH_KEY_TIMESTAMP, this->oauthTimestamp() ));
+		requestParameters.append( qMakePair( OAUTH_KEY_NONCE, this->oauthNonce() ));
+		requestParameters.append( qMakePair( OAUTH_KEY_TOKEN, oauthToken ));
         break;
 
     default:
@@ -208,10 +206,6 @@ QString KQOAuthRequestPrivate::oauthTimestamp() const {
 
 QString KQOAuthRequestPrivate::oauthNonce() const {
     // This is basically for unit tests only. In most cases we don't set the nonce beforehand.
-    if (!oauthNonce_.isEmpty()) {
-        return oauthNonce_;
-    }
-
     return QString::number(qrand());
 }
 
