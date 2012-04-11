@@ -42,6 +42,8 @@ public:
     Q_DECLARE_PUBLIC(KQOAuthAuthReplyServer);
     QTcpSocket *socket;
     QString localFile;
+private:
+    bool handlingRedirect;
 };
 
 #endif // KQOAUTHAUTHREPLYSERVER_P_H

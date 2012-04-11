@@ -180,7 +180,9 @@ private Q_SLOTS:
     void onRequestReplyReceived( QNetworkReply *reply );
     void onAuthorizedRequestReplyReceived( QNetworkReply *reply );
     void onVerificationReceived(QMultiMap<QString, QString> response);
+    void onOauth2VerificationReceived(QMultiMap<QString, QString> response);
     void slotError(QNetworkReply::NetworkError error);
+    void onSslError(QNetworkReply *reply, const QList<QSslError> &errors);
 
 private:
     KQOAuthManagerPrivate *d_ptr;

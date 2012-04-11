@@ -20,6 +20,7 @@
 #include <QTcpSocket>
 #include <QStringList>
 #include <QUrl>
+#include <QFile>
 
 #include "kqoauthauthreplyserver.h"
 #include "kqoauthauthreplyserver_p.h"
@@ -37,7 +38,7 @@ KQOAuthAuthReplyServerPrivate::~KQOAuthAuthReplyServerPrivate()
 
 void KQOAuthAuthReplyServerPrivate::onIncomingConnection() {
     Q_Q(KQOAuthAuthReplyServer);
-
+    qDebug() << "Incoming Connection";
     socket = q->nextPendingConnection();
     connect(socket, SIGNAL(readyRead()),
             this, SLOT(onBytesReady()), Qt::UniqueConnection);
@@ -45,10 +46,32 @@ void KQOAuthAuthReplyServerPrivate::onIncomingConnection() {
 
 void KQOAuthAuthReplyServerPrivate::onBytesReady() {
     Q_Q(KQOAuthAuthReplyServer);
-    
+    qDebug() << "Socket peer host address: " << socket->peerAddress();
     QByteArray reply;
     QByteArray content;
-    content.append("<HTML><h1>Account authorized, go ahead back to the tumblr app and start your experience!</h1></HTML>");
+    QFile file(localFile);
+	 if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+
+	 } else {
+		 qDebug() << "first url worked";
+		 QTextStream in(&file);
+		 while (!in.atEnd()) {
+			 QString line = in.readLine();
+			 qDebug() << line;
+		 }
+	 }
+
+	 QByteArray data = socket->readAll();
+	 qDebug()<< "Query Data: " << data;
+	 QMultiMap<QString, QString> queryParams = parseQueryParams(&data);
+	 if(queryParams.size() == 0 && !handlingRedirect) { //assume theres a hash and do the redirect hack
+		 handlingRedirect = true;
+		 content.append("<HTML><head><script type=\"text/javascript\">var str='http://'+window.location.host + '?' + window.location.hash.substring(1); window.location=str;</script></head><h1>Account authorized, go ahead back to the tumblr app and start your experience!</h1></HTML>");
+	 } else {
+		 handlingRedirect = false;
+		 //TODO then send down the local file if there is one
+		 content.append("<HTML><h1>Account linked, go ahead back to the app and check the status!</h1></HTML>");
+	 }
 
     reply.append("HTTP/1.0 200 OK \r\n");
     reply.append("Content-Type: text/html; charset=\"utf-8\"\r\n");
@@ -56,13 +79,12 @@ void KQOAuthAuthReplyServerPrivate::onBytesReady() {
     reply.append("\r\n");
     reply.append(content);
     socket->write(reply);
-    
-    QByteArray data = socket->readAll();
-    QMultiMap<QString, QString> queryParams = parseQueryParams(&data);
 
-    socket->disconnectFromHost();
-    q->close();
-    emit q->verificationReceived(queryParams);
+    if(!handlingRedirect) {
+    	socket->disconnectFromHost();
+    	q->close();
+    	emit q->verificationReceived(queryParams);
+    }
 }
 
 QMultiMap<QString, QString> KQOAuthAuthReplyServerPrivate::parseQueryParams(QByteArray *data) {

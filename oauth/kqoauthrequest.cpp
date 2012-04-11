@@ -575,9 +575,7 @@ bool KQOAuthRequest::validateXAuthRequest() const {
 bool KQOAuthRequest::validateOauth2Request() const {
 	 Q_D(const KQOAuthRequest);
 
-	if (d->oauthRequestEndpoint.isEmpty()
-		|| d->oauthConsumerKey.isEmpty()
-		|| d->oauthConsumerSecretKey.isEmpty())
+	if (d->oauthRequestEndpoint.isEmpty() || d->oauthToken.isEmpty())
 	{
 		return false;
 	}

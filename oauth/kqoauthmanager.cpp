@@ -159,6 +159,7 @@ void KQOAuthManager::executeRequest(KQOAuthRequest *request) {
     }
 
     if (!request->requestEndpoint().isValid()) {
+    	qDebug() << request->requestEndpoint();
         qWarning() << "Request endpoint URL is not valid. Cannot proceed.";
         d->error = KQOAuthManager::RequestEndpointError;
         return;
@@ -219,6 +220,7 @@ void KQOAuthManager::executeRequest(KQOAuthRequest *request) {
 
         // Submit the request including the params.
         QNetworkReply *reply = d->networkManager->get(networkRequest);
+        reply->ignoreSslErrors();
         connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
                  this, SLOT(slotError(QNetworkReply::NetworkError)));
 
@@ -236,6 +238,7 @@ void KQOAuthManager::executeRequest(KQOAuthRequest *request) {
         } else {
           reply = d->networkManager->post(networkRequest, request->rawData());
         }
+        reply->ignoreSslErrors();
 
         connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
                  this, SLOT(slotError(QNetworkReply::NetworkError)));
@@ -256,6 +259,7 @@ void KQOAuthManager::executeAuthorizedRequest(KQOAuthRequest *request, int id) {
     }
 
     if (!request->requestEndpoint().isValid()) {
+    	qDebug() << request->requestEndpoint();
         qWarning() << "Request endpoint URL is not valid. Cannot proceed.";
         d->error = KQOAuthManager::RequestEndpointError;
         return;
@@ -300,6 +304,7 @@ void KQOAuthManager::executeAuthorizedRequest(KQOAuthRequest *request, int id) {
 
     disconnect(d->networkManager, SIGNAL(finished(QNetworkReply *)),
             this, SLOT(onRequestReplyReceived(QNetworkReply *)));
+    connect(d->networkManager, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError>&)), this, SLOT(onSslError(QNetworkReply* reply, const QList<QSslError> &errors)));
     connect(d->networkManager, SIGNAL(finished(QNetworkReply *)),
             this, SLOT(onAuthorizedRequestReplyReceived(QNetworkReply*)), Qt::UniqueConnection);
 
@@ -315,6 +320,7 @@ void KQOAuthManager::executeAuthorizedRequest(KQOAuthRequest *request, int id) {
 
         // Submit the request including the params.
         QNetworkReply *reply = d->networkManager->get(networkRequest);
+        reply->ignoreSslErrors();
         connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
                  this, SLOT(slotError(QNetworkReply::NetworkError)));
 
@@ -413,7 +419,7 @@ void KQOAuthManager::getOauth2UserAuthorization(QUrl authorizationEndpoint, QStr
 
 	d->setupCallbackServer();
     connect(d->callbackServer, SIGNAL(verificationReceived(QMultiMap<QString, QString>)),
-            this, SLOT( onVerificationReceived(QMultiMap<QString, QString>)));
+            this, SLOT( onOauth2VerificationReceived(QMultiMap<QString, QString>)));
 
     QString serverString = "http://localhost:";
     serverString.append(QString::number(d->callbackServer->serverPort()));
@@ -661,6 +667,25 @@ void KQOAuthManager::onVerificationReceived(QMultiMap<QString, QString> response
     emit authorizationReceived(token, verifier);
 }
 
+void KQOAuthManager::onOauth2VerificationReceived(QMultiMap<QString, QString> response) {
+    Q_D(KQOAuthManager);
+
+    foreach(QString key, response.keys()){
+    	qDebug() << key;
+    }
+
+    QString token = response.value("access_token");
+    if (token.isEmpty()) {
+        d->error = KQOAuthManager::RequestUnauthorized;
+    }
+
+    if (d->error == KQOAuthManager::NoError) {
+        d->isVerified = true;
+    }
+
+    emit authorizationReceived(token, NULL);
+}
+
 void KQOAuthManager::slotError(QNetworkReply::NetworkError error) {
     Q_UNUSED(error)
     Q_D(KQOAuthManager);
@@ -673,5 +698,10 @@ void KQOAuthManager::slotError(QNetworkReply::NetworkError error) {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     d->requestIds.remove(reply);
     reply->deleteLater();
+}
+
+void KQOAuthManager::onSslError(QNetworkReply *reply, const QList<QSslError> &errors) {
+	Q_UNUSED(errors);
+	reply->ignoreSslErrors();
 }
 
