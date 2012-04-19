@@ -304,7 +304,6 @@ void KQOAuthManager::executeAuthorizedRequest(KQOAuthRequest *request, int id) {
 
     disconnect(d->networkManager, SIGNAL(finished(QNetworkReply *)),
             this, SLOT(onRequestReplyReceived(QNetworkReply *)));
-    connect(d->networkManager, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError>&)), this, SLOT(onSslError(QNetworkReply* reply, const QList<QSslError> &errors)));
     connect(d->networkManager, SIGNAL(finished(QNetworkReply *)),
             this, SLOT(onAuthorizedRequestReplyReceived(QNetworkReply*)), Qt::UniqueConnection);
 
@@ -338,6 +337,7 @@ void KQOAuthManager::executeAuthorizedRequest(KQOAuthRequest *request, int id) {
         } else {
           reply = d->networkManager->post(networkRequest, request->rawData());
         }
+        reply->ignoreSslErrors();
 
         d->requestIds.insert(reply, id);
 
@@ -414,7 +414,7 @@ void KQOAuthManager::setSuccessHtmlFile(QString file) {
 
 
 //////////// Public convenience API /////////////
-void KQOAuthManager::getOauth2UserAuthorization(QUrl authorizationEndpoint, QString consumerKey) {
+void KQOAuthManager::getOauth2UserAuthorization(QUrl authorizationEndpoint, QString consumerKey, const KQOAuthParameters &additionalParams) {
 	Q_D(KQOAuthManager);
 
 	d->setupCallbackServer();
@@ -427,6 +427,12 @@ void KQOAuthManager::getOauth2UserAuthorization(QUrl authorizationEndpoint, QStr
     openWebPageUrl.addQueryItem(OAUTH2_KEY_CLIENT_ID, consumerKey);
     openWebPageUrl.addQueryItem(OAUTH2_KEY_RESPONSE_TYPE, "token");
     openWebPageUrl.addQueryItem(OAUTH2_KEY_REDIRECT_URI, serverString);
+    if(additionalParams.size() > 0) {
+		QList< QPair<QString, QString> > urlParams = d->createQueryParams(additionalParams);
+		for(int i=0; i < urlParams.length(); i++){
+			openWebPageUrl.addQueryItem(urlParams[i].first, urlParams[i].second);
+		}
+    }
     qDebug() << openWebPageUrl.toString();
     navigator_invoke(openWebPageUrl.toString().toStdString().c_str(),0);
 }

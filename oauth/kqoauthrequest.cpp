@@ -307,6 +307,7 @@ void KQOAuthRequest::initRequest(KQOAuthRequest::RequestType type, const QUrl &r
     d->oauthNonce_ = d->oauthNonce();
     this->setSignatureMethod(KQOAuthRequest::HMAC_SHA1);
     this->setHttpMethod(KQOAuthRequest::POST);
+    this->setRequestOAuthMethod(KQOAuthRequest::OAUTH1);
     d->oauthVersion = "1.0"; // Currently supports only version 1.0
 
     d->contentType = "application/x-www-form-urlencoded";

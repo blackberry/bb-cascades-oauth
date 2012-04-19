@@ -21,6 +21,8 @@
 #include <QStringList>
 #include <QUrl>
 #include <QFile>
+#include <QDir>
+#include <QFileInfoList>
 
 #include "kqoauthauthreplyserver.h"
 #include "kqoauthauthreplyserver_p.h"
@@ -49,17 +51,6 @@ void KQOAuthAuthReplyServerPrivate::onBytesReady() {
     qDebug() << "Socket peer host address: " << socket->peerAddress();
     QByteArray reply;
     QByteArray content;
-    QFile file(localFile);
-	 if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-
-	 } else {
-		 qDebug() << "first url worked";
-		 QTextStream in(&file);
-		 while (!in.atEnd()) {
-			 QString line = in.readLine();
-			 qDebug() << line;
-		 }
-	 }
 
 	 QByteArray data = socket->readAll();
 	 qDebug()<< "Query Data: " << data;
@@ -69,8 +60,21 @@ void KQOAuthAuthReplyServerPrivate::onBytesReady() {
 		 content.append("<HTML><head><script type=\"text/javascript\">var str='http://'+window.location.host + '?' + window.location.hash.substring(1); window.location=str;</script></head><h1>Account authorized, go ahead back to the tumblr app and start your experience!</h1></HTML>");
 	 } else {
 		 handlingRedirect = false;
-		 //TODO then send down the local file if there is one
-		 content.append("<HTML><h1>Account linked, go ahead back to the app and check the status!</h1></HTML>");
+		QFile file("app/native/assets/" + localFile);
+		QString fileData;
+		 if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+			 qDebug() << "file worked";
+			 QTextStream in(&file);
+			 while (!in.atEnd()) {
+				 fileData += in.readLine();
+			 }
+			 file.close();
+		 }
+		 if(fileData.isEmpty()) {
+			 content.append("<HTML><h1>Account linked, go ahead back to the app and check the status!</h1></HTML>");
+		 } else {
+			 content.append(fileData);
+		 }
 	 }
 
     reply.append("HTTP/1.0 200 OK \r\n");
