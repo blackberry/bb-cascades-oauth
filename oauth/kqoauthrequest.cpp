@@ -606,7 +606,7 @@ void KQOAuthRequest::requestTimerStart()
 {
     Q_D(KQOAuthRequest);
     if (d->timeout > 0) {
-        connect(&(d->timer), SIGNAL(timeout()), this, SIGNAL(requestTimedout()));
+        connect(&&d->timer, SIGNAL(timeout()), this, SIGNAL(requestTimedout()));
         d->timer.start(d->timeout);
     }
 }
@@ -615,7 +615,7 @@ void KQOAuthRequest::requestTimerStop()
 {
     Q_D(KQOAuthRequest);
     if (d->timeout > 0) {
-        disconnect(&(d->timer), SIGNAL(timeout()), this, SIGNAL(requestTimedout()));
+        disconnect(&&d->timer, SIGNAL(timeout()), this, SIGNAL(requestTimedout()));
         d->timer.stop();
     }
 }
