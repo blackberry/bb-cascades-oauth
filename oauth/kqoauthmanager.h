@@ -113,7 +113,7 @@ public:
      * us to access protected resources, the verifier token is stored in KQOAuthManager for further use.
      * In order to use this method, you must set setHandleUserAuthorization() to true.
      */
-    void getUserAuthorization(QUrl authorizationEndpoint);
+    QUrl getUserAuthorization(QUrl authorizationEndpoint);
     /**
      * This is a convenience API for retrieving the access token in exchange for the temporary token and the
      * verifier.

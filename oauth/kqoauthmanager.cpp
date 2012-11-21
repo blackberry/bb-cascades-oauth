@@ -441,19 +441,20 @@ void KQOAuthManager::getOauth2UserAuthorization(QUrl authorizationEndpoint, QStr
     navigator_invoke(openWebPageUrl.toString().toStdString().c_str(),0);
 }
 
-void KQOAuthManager::getUserAuthorization(QUrl authorizationEndpoint) {
+QUrl KQOAuthManager::getUserAuthorization(QUrl authorizationEndpoint) {
     Q_D(KQOAuthManager);
 
+	QUrl emptyReturn = QUrl("");
     if (!d->hasTemporaryToken) {
         qWarning() << "No temporary tokens retreieved. Cannot get user authorization.";
         d->error = KQOAuthManager::RequestUnauthorized;
-        return;
+        return emptyReturn;
     }
 
     if (!authorizationEndpoint.isValid()) {
         qWarning() << "Authorization endpoint not valid. Cannot proceed.";
         d->error = KQOAuthManager::RequestEndpointError;
-        return;
+        return emptyReturn;
     }
 
     d->error = KQOAuthManager::NoError;
@@ -466,7 +467,8 @@ void KQOAuthManager::getUserAuthorization(QUrl authorizationEndpoint) {
     // by the service.
 
     qDebug() << openWebPageUrl.toString();
-    navigator_invoke(openWebPageUrl.toString().toStdString().c_str(),0);
+    //navigator_invoke(openWebPageUrl.toString().toStdString().c_str(),0);
+	return openWebPageUrl;
 }
 
 void KQOAuthManager::getUserAccessTokens(QUrl accessTokenEndpoint) {
