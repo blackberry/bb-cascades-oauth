@@ -108,6 +108,12 @@ public:
 
     /**
      * This is a convenience API for authorizing the user.
+     * The call will verify that a temporary token was received and return the url that the user needs to
+     * use to authorize the app, it will not open the user's default browser.
+     */
+    QUrl getUserAuthorizationUrl(QUrl authorizationEndpoint);
+    /**
+     * This is a convenience API for authorizing the user.
      * The call will open the user's default browser, setup a local HTTP server and parse the reply from the
      * service after the user has authorized us to access protected resources. If the user authorizes
      * us to access protected resources, the verifier token is stored in KQOAuthManager for further use.

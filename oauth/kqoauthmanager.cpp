@@ -441,19 +441,19 @@ void KQOAuthManager::getOauth2UserAuthorization(QUrl authorizationEndpoint, QStr
     navigator_invoke(openWebPageUrl.toString().toStdString().c_str(),0);
 }
 
-void KQOAuthManager::getUserAuthorization(QUrl authorizationEndpoint) {
+QUrl KQOAuthManager::getUserAuthorizationUrl(QUrl authorizationEndpoint) {
     Q_D(KQOAuthManager);
 
     if (!d->hasTemporaryToken) {
         qWarning() << "No temporary tokens retreieved. Cannot get user authorization.";
         d->error = KQOAuthManager::RequestUnauthorized;
-        return;
+        return QUrl();
     }
 
     if (!authorizationEndpoint.isValid()) {
         qWarning() << "Authorization endpoint not valid. Cannot proceed.";
         d->error = KQOAuthManager::RequestEndpointError;
-        return;
+        return QUrl();
     }
 
     d->error = KQOAuthManager::NoError;
@@ -462,11 +462,19 @@ void KQOAuthManager::getUserAuthorization(QUrl authorizationEndpoint) {
     QUrl openWebPageUrl(authorizationEndpoint.toString(), QUrl::StrictMode);
     openWebPageUrl.addQueryItem(tokenParam.first, tokenParam.second);
 
-    // Open the user's default browser to the resource authorization page provided
-    // by the service.
-
     qDebug() << openWebPageUrl.toString();
-    navigator_invoke(openWebPageUrl.toString().toStdString().c_str(),0);
+    return openWebPageUrl;
+}
+
+void KQOAuthManager::getUserAuthorization(QUrl authorizationEndpoint) {
+    QUrl openWebPageUrl = getUserAuthorizationUrl(authorizationEndpoint);
+
+    if(!openWebPageUrl.isEmpty()) {
+        // Open the user's default browser to the resource authorization page provided
+        // by the service.
+
+        navigator_invoke(openWebPageUrl.toString().toStdString().c_str(),0);
+    }
 }
 
 void KQOAuthManager::getUserAccessTokens(QUrl accessTokenEndpoint) {
